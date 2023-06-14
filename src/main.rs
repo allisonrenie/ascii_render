@@ -2,11 +2,90 @@ use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::path::Path;
 
+// some constants
+const CHAR_WIDTH: f32 = 80.;
+const CHAR_WIDTH_I: i32 = 80;
+
+const CHAR_HEIGHT: f32 = 40.;
+const CHAR_HEIGHT_I: i32 = 40;
+
 struct Point3
 {
   x: f32,
   y: f32,
   z: f32,
+}
+
+fn draw_points(points: &mut Vec<Point3>) -> ()
+{
+  // make line amount depend on window size later?
+
+  // first need to find the minimum and maximum
+  // this seems really inefficient, maybe there's a better way??
+  let mut y_max: f32 = 0.;
+  let mut y_min: f32 = 0.;
+  let mut x_max: f32 = 0.;
+  let mut x_min: f32 = 0.;
+
+  for p in &mut *points
+  {
+    if p.y >= y_max
+    {
+      y_max = p.y;
+    }
+    if p.y <= y_min
+    {
+      y_min = p.y;
+    }
+    if p.x >= x_max
+    {
+      x_max = p.x;
+    }
+    if p.x <= x_min
+    {
+      x_min = p.x;
+    }
+  }
+
+  let y_diff: f32 = y_max - y_min;
+  let x_diff: f32 = x_max - x_min;
+
+  for line in (0..CHAR_HEIGHT_I).rev()
+  {
+    // will store the points for this line by their char position
+    let mut line_points: Vec<i32> = Vec::new();
+    for p in &mut *points
+    {
+      if (p.y/y_diff * CHAR_HEIGHT).round() as i32 == line
+      {
+        // this point is on the line we are drawing
+        // now, where is the point on this line?
+        // pushing char place to vec
+        line_points.push((p.x/x_diff * CHAR_WIDTH).round() as i32);
+      }
+    }
+
+    // now creating the string
+    let mut line_string = String::new();
+    for i in 0..CHAR_WIDTH_I
+    {
+      if line_points.contains(&i)
+      {
+        line_string.push('@');
+      }
+      else
+      {
+        line_string.push(' ');
+      }
+    }
+
+    // finally printing our line
+    println!("{}", line_string);
+  }
+
+  // make a string
+  // for each character in the string (0 through 80)
+  // match the character to 
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>>
@@ -58,10 +137,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>>
     points.push(new_point);
   }
 
-  for p in points
-  {
-    print!("here's a point: {}, {}, {}\n", p.x, p.y, p.z);
-  }
+  draw_points(&mut points);
 
   Ok(())
 }
