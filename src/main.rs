@@ -2,6 +2,8 @@ use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::path::Path;
 
+use matrix_lib::*;
+
 // some constants
 const CHAR_WIDTH: f32 = 80.;
 const CHAR_WIDTH_I: i32 = 80;
@@ -9,14 +11,14 @@ const CHAR_WIDTH_I: i32 = 80;
 const CHAR_HEIGHT: f32 = 40.;
 const CHAR_HEIGHT_I: i32 = 40;
 
-struct Point3
-{
-  x: f32,
-  y: f32,
-  z: f32,
-}
+// struct Point3
+// {
+//   x: f32,
+//   y: f32,
+//   z: f32,
+// }
 
-fn draw_points(points: &mut Vec<Point3>) -> ()
+fn draw_points(points: &mut Vec<Vec3>) -> ()
 {
   // make line amount depend on window size later?
 
@@ -107,11 +109,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>>
   let reader = BufReader::new(file);
 
   // empty vec of points
-  let mut points: Vec<Point3> = Vec::new();
+  let mut points: Vec<Vec3> = Vec::new();
 
   // next, must get this giant array (or at least parts that start with v)
   // into a giant array of point3 structs
-
   for line in reader.lines()
   {
     let line = line?;
@@ -127,17 +128,32 @@ fn main() -> Result<(), Box<dyn std::error::Error>>
       continue;
     }
 
-    let new_point = Point3
-    {
-      x: entries[1].parse::<f32>().unwrap(),
-      y: entries[2].parse::<f32>().unwrap(),
-      z: entries[3].parse::<f32>().unwrap(),
-    };
+    let new_point = Vec3::new
+    (
+      entries[1].parse::<f32>().unwrap(),
+      entries[2].parse::<f32>().unwrap(),
+      entries[3].parse::<f32>().unwrap(),
+    );
 
     points.push(new_point);
   }
 
-  draw_points(&mut points);
+  let rads: f32 = radians(90.); 
+  let mut tm: Mat3 = Mat3::new_id();
+  tm.rotate(Axis::X, rads);
+
+
+  let mut transformed_points: Vec<Vec3> = points
+    .iter()
+    .map(|point| tm * point.clone())
+    .collect();
+
+  for point in &transformed_points
+  {
+    println!("x: {} y: {} z: {}", point.x, point.y, point.z);
+  }
+
+  draw_points(&mut transformed_points);
 
   Ok(())
 }
