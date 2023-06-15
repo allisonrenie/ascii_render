@@ -150,11 +150,11 @@ fn draw_points(points: &mut Vec<Vec3>) -> ()
       // of the points that are on this line, it is "drawn"
       if line_points.contains(&i)
       {
-        line_string.push('=');
+        line_string.push('o');
       }
       else
       {
-        line_string.push('.');
+        line_string.push(' ');
       }
     }
 
@@ -222,7 +222,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>>
   let mut last_frame_time: Instant = Instant::now(); // will hold time at last frame
   let ani_dur: Duration = Duration::from_secs(2); // duration of animation
   let start_time: Instant = Instant::now(); // start time 
-  let ani_loops: u32 = 5; // how many times animation should run
+  let ani_loops: u32 = 3; // how many times animation should run
   
   loop
   {
@@ -242,7 +242,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>>
       // creating our transformation matrix
       let rads: f32 = radians((elapsed.as_secs_f32() % ani_dur.as_secs_f32())/ani_dur.as_secs_f32() * 90.); 
       let mut tm: Mat3 = Mat3::new_id();
-      tm.rotate(Axis::Y, rads);
+      tm.rotate(Axis::Y, rads).rotate(Axis::X, rads);
 
       // transforming all of our points
       let mut transformed_points: Vec<Vec3> = points
